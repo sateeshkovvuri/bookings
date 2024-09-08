@@ -28,7 +28,7 @@ wss.on('connection', (ws) => {
             credentials:["Sateeshkovvuri","Ic25#52cI"],
             src:"LINGAMPALLI - LPI (SECUNDERABAD)",
             dest:"DWARAPUDI - DWP ",
-            quota:"TATKAL",
+            quota:"GENERAL",
             //class:"AC 3 Tier (3A)",
             class:"Sleeper (SL)",
             date:"27/11/2024",
@@ -165,7 +165,7 @@ wss.on('connection', (ws) => {
                         await page.waitForNavigation({timeout:0,waitUntil:'domcontentloaded'})
                         
                         const passengers = bookingDetails.passengers
-                        const addPassenger = await page.$("span.prenext")
+                        const addPassenger = await page.$("span.prenext",{timeout:0,visible:true})
                         const totalPassengers = passengers.length
                         console.log("Total passengers: ",totalPassengers)
                         await new Promise(async(accept,reject)=>{
