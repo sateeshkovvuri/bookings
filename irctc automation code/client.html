@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tatkal booking</title>
+</head>
+<body>
+    <h1>Tatkal Client</h1>
+    <button id="connectBtn">Connect to Tatkal Server</button>
+    <p id="status">Not connected</p>
+    <p id="response"></p>
+    <div style="background-color: blue; width: fit-content;">
+        <img src="" alt="login-captcha will be loaded" id="login-captcha">
+    </div>
+    <input type="text" id="solved-login-captcha" name="solved-login-captcha">
+    <button id="submit-login-captcha">Submit login captcha</button>
+
+    <div style="background-color: blue; width: fit-content;">
+        <img src="" alt="details-confirmation-captcha will be loaded" id="details-confirmation-captcha">
+    </div>
+    <input type="text" id="solved-details-confirmation-captcha" name="solved-details-confirmation-captcha">
+    <button id="submit-details-confirmation-captcha">Submit details confirmation captcha</button>
+
+    <input type="text" readonly placeholder="" id="otp">
+    <button id="otp-btn">submit otp</button>
+
+    <script>
+        const connectBtn = document.getElementById('connectBtn');
+        const status = document.getElementById('status');
+        const response = document.getElementById('response');
+
+
+        connectBtn.addEventListener('click', () => {
+            //const ws = new WebSocket('ws://47.129.43.163:3003');
+            const ws = new WebSocket('ws://localhost:3003');
+
+            ws.onopen = () => {
+                status.textContent = 'Connected to WebSocket server';
+                document.getElementById("submit-login-captcha").addEventListener("click",()=>{
+                    ws.send(JSON.stringify({"solved-login-captcha":document.getElementById("solved-login-captcha").value}))
+                })
+                document.getElementById("submit-details-confirmation-captcha").addEventListener("click",()=>{
+                    ws.send(JSON.stringify({"solved-details-confirmation-captcha":document.getElementById("solved-details-confirmation-captcha").value}))
+                })
+                document.getElementById("otp-btn").addEventListener("click",()=>{
+                    ws.send(JSON.stringify({"solved-otp":document.getElementById("otp").value}))
+                })
+            };
+
+            ws.onmessage = (event) => {
+                console.log(event)
+                let data = JSON.parse(event.data)
+                let requirement = Object.keys(data)[0]
+                if(requirement == "login-captcha"){
+                    document.getElementById("login-captcha").setAttribute("src",data[requirement])
+                }
+                else if(requirement == "details-confirmation-captcha"){
+                    console.log(data)
+                    document.getElementById("details-confirmation-captcha").setAttribute("src",data[requirement])
+                }
+                else if(requirement == "otp"){
+                    console.log(data)
+                    document.getElementById("otp").setAttribute("placeholder","enter OTP")
+                    document.getElementById("otp").removeAttribute("readonly")
+                }
+            };
+
+            ws.onclose = () => {
+                status.textContent = 'Disconnected from WebSocket server';
+            };
+
+            ws.onerror = (error) => {
+                status.textContent = `WebSocket error: ${error.message}`;
+            };
+        });
+    </script>
+</body>
+</html>
