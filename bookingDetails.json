@@ -1,0 +1,17 @@
+{
+    "credentials":["user-name","password"],
+    "dest":"",
+    "src":"",
+    "quota":"GENERAL",
+    "class":"Sleeper (SL)",
+    "date":"14/01/2025",
+    "trainNo":"",
+    "passengers":[{
+        "name":"",
+        "age":"",
+        "gender":"",
+        "berth":""
+    }
+],
+"vpa":""
+}
