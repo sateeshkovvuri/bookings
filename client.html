@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRCTC booking</title>
+
+    <style>
+        button{
+            padding:10px;
+            cursor: pointer;
+        }
+        h1{
+            text-align: center;
+            margin-bottom:50px;
+        }
+        #frame{
+            display: flex;
+            flex-direction: row;
+            width:100%;
+            justify-content: center;
+        }
+        #connection{
+            margin-right: 100px;
+        }
+        input{
+            margin: 10px 5px 30px 0px;
+            height: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>IRCTC Client</h1>
+    <div id="frame">
+        <div id="connection">
+            <button id="connectBtn">Connect to Server</button>
+            <p id="status">Not connected</p>
+            <p id="response"></p>
+        </div>
+        <div id="captchas">
+            <div style="background-color: steelblue; width: fit-content;padding: 5px;">
+                <img src="" alt="login-captcha will be loaded" id="login-captcha">
+            </div>
+            <input type="text" id="solved-login-captcha" name="solved-login-captcha">
+            <button id="submit-login-captcha">Submit login captcha</button>
+        
+            <div style="background-color: steelblue; width: fit-content;padding: 5px;">
+                <img src="" alt="details-confirmation-captcha will be loaded" id="details-confirmation-captcha">
+            </div>
+            <input type="text" id="solved-details-confirmation-captcha" name="solved-details-confirmation-captcha">
+            <button id="submit-details-confirmation-captcha">Submit details confirmation captcha</button>
+        </div>
+    </div>
+
+
+    <script>
+        const connectBtn = document.getElementById('connectBtn');
+        const status = document.getElementById('status');
+        const response = document.getElementById('response');
+
+        const loginCaptchaBtn = document.getElementById("submit-login-captcha")
+        const confirmationCaptchaBtn = document.getElementById("submit-details-confirmation-captcha")
+
+        loginCaptchaBtn.disabled = true;
+        confirmationCaptchaBtn.disabled = true;
+        
+        connectBtn.addEventListener('click', () => {
+            const ws = new WebSocket('ws://localhost:3003');
+            connectBtn.disabled = true
+            ws.onopen = () => {
+                status.textContent = 'Connected to WebSocket server';
+                loginCaptchaBtn.addEventListener("click",()=>{
+                    ws.send(JSON.stringify({"solved-login-captcha":document.getElementById("solved-login-captcha").value}))
+                    loginCaptchaBtn.disabled = true
+                    document.getElementById("solved-login-captcha").setAttribute("readonly",true)
+                })
+                confirmationCaptchaBtn.addEventListener("click",()=>{
+                    ws.send(JSON.stringify({"solved-details-confirmation-captcha":document.getElementById("solved-details-confirmation-captcha").value}))
+                    confirmationCaptchaBtn.disabled = true
+                    document.getElementById("solved-details-confirmation-captcha").setAttribute("readonly",true)
+                })
+            };
+
+            ws.onmessage = (event) => {
+                let data = JSON.parse(event.data)
+                let requirement = Object.keys(data)[0]
+                if(requirement == "login-captcha"){
+                    document.getElementById("login-captcha").setAttribute("src",data[requirement])
+                    loginCaptchaBtn.disabled = false
+                }
+                else if(requirement == "details-confirmation-captcha"){
+                    document.getElementById("details-confirmation-captcha").setAttribute("src",data[requirement])
+                    confirmationCaptchaBtn.disabled = false
+                }
+            };
+
+            ws.onclose = () => {
+                status.textContent = 'Disconnected from WebSocket server';
+            };
+
+            ws.onerror = (error) => {
+                status.textContent = `WebSocket error: ${error.message}`;
+            };
+        });
+    </script>
+</body>
+</html>
